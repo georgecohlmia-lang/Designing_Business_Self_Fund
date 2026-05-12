@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Self-Funding Strategy Worksheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- design tokens ---------- */
+  :root {
+    --navy:     #1E2A3A;
+    --navy-2:   #2D4059;
+    --navy-dk:  #0F1923;
+    --gold:     #C8972A;
+    --gold-dk:  #B07D1E;
+    --gold-lt:  #FFF8E8;
+    --red:      #C0392B;
+    --teal:     #0D6E8A;
+    --cream:    #F2EDE6;
+    --cream-dk: #E8DFD3;
+    --slate:    #94A3B8;
+    --paper:    #FAF7F0;
+    --ink:      #1E2A3A;
+    --ink-soft: #2D4059;
+    --rule:     #DDD3C0;
+
+    --font-display: 'Source Serif 4', Georgia, serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .frame {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 56px 40px 120px;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 36px;
+    margin-bottom: 48px;
+  }
+  .brand-stripe {
+    display: flex; align-items: center; gap: 14px;
+    font-family: var(--font-body); font-size: 11px;
+    font-weight: 700; letter-spacing: 0.22em;
+    color: var(--gold); margin-bottom: 28px;
+  }
+  .brand-stripe::after {
+    content: ''; flex: 1; height: 1px; background: var(--cream-dk);
+  }
+  h1.title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--navy);
+    margin-bottom: 18px;
+  }
+  h1.title em {
+    font-style: italic;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .deck { font-family: var(--font-display); font-style: italic; font-size: 19px; color: var(--ink-soft); max-width: 640px; }
+
+  /* ---------- progress ---------- */
+  .progress { display: flex; gap: 4px; margin: 40px 0 20px; }
+  .progress-step { flex: 1; height: 3px; background: var(--cream-dk); transition: background 0.4s; }
+  .progress-step.active { background: var(--gold); }
+  .progress-step.done { background: var(--navy); }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    color: var(--slate); text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+  .progress-label span.current { color: var(--navy); }
+
+  /* ---------- form panels ---------- */
+  .panel { display: none; animation: fadeIn 0.4s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-header { margin-bottom: 36px; }
+  .panel-eyebrow {
+    font-family: var(--font-body); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.22em; color: var(--red); margin-bottom: 14px;
+  }
+  .panel-title {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 36px; line-height: 1.1; color: var(--navy); margin-bottom: 12px;
+  }
+  .panel-intro {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 18px; color: var(--ink-soft); max-width: 640px;
+  }
+
+  /* ---------- model picker (step 1 first question) ---------- */
+  .model-picker {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-bottom: 8px;
+  }
+  @media (max-width: 700px) { .model-picker { grid-template-columns: 1fr; } }
+  .model-option {
+    background: white;
+    border: 2px solid var(--cream-dk);
+    padding: 18px 18px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .model-option:hover { border-color: var(--gold); }
+  .model-option input { display: none; }
+  .model-option:has(input:checked) {
+    border-color: var(--navy); background: var(--gold-lt);
+  }
+  .model-option-label {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 18px; color: var(--navy); margin-bottom: 4px;
+  }
+  .model-option-help {
+    font-family: var(--font-body); font-size: 12.5px;
+    color: var(--ink-soft); line-height: 1.45;
+  }
+
+  /* ---------- form fields ---------- */
+  .field { margin-bottom: 32px; }
+  .field-label {
+    display: block;
+    font-family: var(--font-body); font-weight: 600; font-size: 13px;
+    letter-spacing: 0.04em; color: var(--navy); margin-bottom: 6px;
+  }
+  .field-help {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 15px; color: var(--ink-soft); margin-bottom: 10px;
+  }
+  .field-example {
+    font-family: var(--font-body); font-size: 13px;
+    color: var(--slate); margin-bottom: 12px;
+    padding-left: 10px; border-left: 2px solid var(--cream-dk);
+  }
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--cream-dk);
+    border-bottom: 2px solid var(--navy);
+    padding: 14px 16px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--navy);
+    border-radius: 0;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-bottom-color: var(--gold);
+    background: var(--gold-lt);
+  }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; gap: 0; } }
+
+  .currency-prefix { position: relative; }
+  .currency-prefix::before {
+    content: '$';
+    position: absolute;
+    left: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--slate); font-weight: 600;
+    pointer-events: none; z-index: 1;
+  }
+  .currency-prefix input { padding-left: 30px; }
+
+  /* ---------- sub-cards inside steps (e.g. "tell me about your subscription") ---------- */
+  .sub-card {
+    background: white;
+    border: 1px solid var(--cream-dk);
+    border-left: 4px solid var(--teal);
+    padding: 24px 26px;
+    margin-bottom: 20px;
+  }
+  .sub-card.optional { border-left-color: var(--slate); }
+  .sub-card-title {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 19px; color: var(--navy); margin-bottom: 4px;
+  }
+  .sub-card-tag {
+    display: inline-block;
+    font-family: var(--font-body); font-weight: 700; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 2px 8px; margin-bottom: 14px;
+    background: var(--teal); color: white;
+  }
+  .sub-card.optional .sub-card-tag { background: var(--slate); }
+  .sub-card-help {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 15px; color: var(--ink-soft); margin-bottom: 18px;
+  }
+
+  /* ---------- diagnostic radios ---------- */
+  .diag-question {
+    background: white;
+    border: 1px solid var(--cream-dk);
+    border-left: 4px solid var(--gold);
+    padding: 22px 24px;
+    margin-bottom: 16px;
+  }
+  .diag-q-num {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 15px; color: var(--gold-dk); margin-bottom: 4px;
+  }
+  .diag-q-text {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 18px; color: var(--navy); margin-bottom: 8px; line-height: 1.35;
+  }
+  .diag-q-example {
+    font-family: var(--font-body); font-size: 12.5px;
+    color: var(--slate); margin-bottom: 16px; line-height: 1.5;
+  }
+  .diag-options { display: flex; gap: 12px; }
+  .diag-options label {
+    flex: 1;
+    background: var(--paper);
+    border: 1px solid var(--cream-dk);
+    padding: 12px 16px;
+    text-align: center;
+    cursor: pointer;
+    font-family: var(--font-body); font-weight: 600; font-size: 13px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-soft);
+    transition: all 0.15s;
+  }
+  .diag-options input { display: none; }
+  .diag-options label:hover { border-color: var(--gold); color: var(--navy); }
+  .diag-options label:has(input:checked) {
+    background: var(--navy); border-color: var(--navy); color: white;
+  }
+
+  /* ---------- nav buttons ---------- */
+  .nav { display: flex; justify-content: space-between; gap: 16px; margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--rule); }
+  .btn {
+    font-family: var(--font-body);
+    font-weight: 600; font-size: 13px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 14px 28px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--navy); color: white; }
+  .btn-primary:hover { background: var(--navy-dk); }
+  .btn-primary:disabled { background: var(--slate); cursor: not-allowed; opacity: 0.5; }
+  .btn-secondary {
+    background: transparent; color: var(--ink-soft);
+    border: 1px solid var(--cream-dk);
+  }
+  .btn-secondary:hover { background: var(--cream); color: var(--navy); }
+
+  /* ---------- strategy output ---------- */
+  .strategy { display: none; }
+  .strategy.active { display: block; animation: fadeIn 0.5s ease; }
+
+  .strategy-masthead {
+    border-top: 4px solid var(--navy);
+    border-bottom: 1px solid var(--rule);
+    padding: 32px 0 28px;
+    margin-bottom: 40px;
+  }
+  .strategy-title {
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 44px; line-height: 1.05;
+    color: var(--navy); margin-bottom: 12px;
+  }
+  .strategy-title em { color: var(--gold); font-style: italic; font-weight: 500; }
+  .strategy-sub {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 18px; color: var(--ink-soft);
+  }
+  .strategy-meta {
+    display: flex; gap: 32px; margin-top: 20px;
+    font-family: var(--font-body); font-size: 12px;
+    color: var(--slate); letter-spacing: 0.08em; text-transform: uppercase;
+    flex-wrap: wrap;
+  }
+  .strategy-meta span strong { color: var(--navy); display: block; font-size: 16px; letter-spacing: 0; text-transform: none; margin-top: 2px; }
+
+  .section { margin-bottom: 48px; }
+  .section-eyebrow {
+    font-family: var(--font-body); font-weight: 700; font-size: 11px;
+    letter-spacing: 0.22em; color: var(--red); margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 28px; line-height: 1.15; color: var(--navy); margin-bottom: 20px;
+  }
+  .section p {
+    margin-bottom: 14px; line-height: 1.65; color: var(--ink-soft);
+    font-size: 15.5px;
+  }
+  .section p strong { color: var(--navy); font-weight: 600; }
+
+  .formula-box {
+    background: var(--gold-lt);
+    border: 2px solid var(--gold);
+    padding: 28px 32px;
+    margin: 24px 0;
+  }
+  .formula-label {
+    font-family: var(--font-body); font-weight: 700; font-size: 11px;
+    letter-spacing: 0.22em; color: var(--red); margin-bottom: 12px;
+  }
+  .formula-body {
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 600; line-height: 1.4;
+    color: var(--navy);
+  }
+  .formula-result {
+    font-family: var(--font-display);
+    font-size: 36px; font-weight: 600;
+    color: var(--gold-dk); margin-top: 12px; line-height: 1.2;
+  }
+  .formula-result em { font-style: italic; color: var(--ink-soft); font-size: 16px; font-weight: 500; display: block; margin-top: 6px; }
+
+  /* dual formula treatment for mixed-model */
+  .formula-dual {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 600px) { .formula-dual { grid-template-columns: 1fr; } }
+  .formula-dual .formula-box { margin: 0; }
+  .formula-dual .formula-result { font-size: 28px; }
+
+  /* mini-stat row */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px; margin: 20px 0;
+  }
+  .stat {
+    background: white;
+    border: 1px solid var(--cream-dk);
+    padding: 16px 18px;
+  }
+  .stat-label {
+    font-family: var(--font-body); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.18em; color: var(--slate);
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 26px; color: var(--navy); line-height: 1.1;
+  }
+  .stat-sub {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 13px; color: var(--ink-soft); margin-top: 2px;
+  }
+
+  /* timeline visualization for cash cycle */
+  .cycle-viz {
+    background: white;
+    border: 1px solid var(--cream-dk);
+    padding: 28px;
+    margin: 20px 0;
+  }
+  .cycle-viz-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 24px;
+  }
+  .cycle-viz-title {
+    font-family: var(--font-display); font-weight: 600; font-size: 16px;
+    color: var(--navy);
+  }
+  .cycle-viz-total {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 15px; color: var(--ink-soft);
+  }
+  .cycle-viz-total strong { color: var(--red); font-style: normal; font-weight: 700; font-size: 17px; }
+
+  .cycle-bar {
+    position: relative;
+    height: 50px;
+    background: var(--cream);
+    margin-bottom: 12px;
+    border-radius: 2px;
+  }
+  .cycle-event {
+    position: absolute;
+    top: -2px; bottom: -2px;
+    width: 3px;
+    background: var(--navy);
+  }
+  .cycle-event.spend { background: var(--red); }
+  .cycle-event.collect { background: var(--teal); }
+  .cycle-event-label {
+    position: absolute;
+    top: -22px;
+    transform: translateX(-50%);
+    font-family: var(--font-body);
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--navy); white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .cycle-event.spend .cycle-event-label { color: var(--red); }
+  .cycle-event.collect .cycle-event-label { color: var(--teal); }
+  .cycle-gap {
+    position: absolute; top: 8px; bottom: 8px;
+    background: rgba(192, 57, 43, 0.12);
+    border-left: 1px solid rgba(192, 57, 43, 0.3);
+    border-right: 1px solid rgba(192, 57, 43, 0.3);
+  }
+  .cycle-axis {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-body); font-size: 11px;
+    color: var(--slate); margin-top: 4px;
+  }
+
+  /* recurring-only "advantage" callout when there's no real cycle */
+  .advantage-callout {
+    background: var(--teal);
+    color: white;
+    padding: 28px 32px;
+    margin: 20px 0;
+  }
+  .advantage-label {
+    font-family: var(--font-body); font-weight: 700; font-size: 11px;
+    letter-spacing: 0.22em; color: var(--gold-lt); margin-bottom: 10px;
+  }
+  .advantage-headline {
+    font-family: var(--font-display); font-weight: 600; font-size: 24px;
+    line-height: 1.25; color: white; margin-bottom: 8px;
+  }
+  .advantage-body {
+    font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+    color: rgba(255,255,255,0.92);
+  }
+
+  /* diagnostic verdict */
+  .verdict {
+    border-left: 6px solid var(--navy);
+    background: white;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+  .verdict.green { border-left-color: var(--teal); }
+  .verdict.amber { border-left-color: var(--gold); }
+  .verdict.red { border-left-color: var(--red); }
+  .verdict-label {
+    font-family: var(--font-body); font-weight: 700; font-size: 11px;
+    letter-spacing: 0.22em; margin-bottom: 8px;
+  }
+  .verdict.green .verdict-label { color: var(--teal); }
+  .verdict.amber .verdict-label { color: var(--gold-dk); }
+  .verdict.red .verdict-label { color: var(--red); }
+  .verdict-headline {
+    font-family: var(--font-display); font-weight: 600; font-size: 22px;
+    color: var(--navy); margin-bottom: 10px; line-height: 1.25;
+  }
+  .verdict-body {
+    color: var(--ink-soft); font-size: 15px; line-height: 1.6;
+  }
+
+  /* lever cards */
+  .levers { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 20px 0; }
+  .lever {
+    background: white;
+    border: 1px solid var(--cream-dk);
+    padding: 22px 26px;
+    border-left: 4px solid var(--cream-dk);
+  }
+  .lever.recommended { border-left-color: var(--gold); }
+  .lever.optional { border-left-color: var(--slate); opacity: 0.85; }
+  .lever-num {
+    font-family: var(--font-display); font-weight: 600; font-size: 14px;
+    color: var(--gold-dk); font-style: italic;
+  }
+  .lever-title {
+    font-family: var(--font-display); font-weight: 600; font-size: 20px;
+    color: var(--navy); margin: 4px 0 10px;
+  }
+  .lever-tag {
+    display: inline-block;
+    font-family: var(--font-body); font-weight: 700; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 3px 8px; margin-bottom: 12px;
+  }
+  .lever.recommended .lever-tag { background: var(--gold); color: var(--navy); }
+  .lever.optional .lever-tag { background: var(--cream); color: var(--ink-soft); }
+  .lever-body { color: var(--ink-soft); font-size: 14.5px; line-height: 1.6; }
+
+  /* personalized scripts (multiple possible) */
+  .script-box {
+    background: var(--navy);
+    color: var(--cream);
+    padding: 28px 32px;
+    margin: 24px 0;
+  }
+  .script-box-label {
+    font-family: var(--font-body); font-weight: 700; font-size: 11px;
+    letter-spacing: 0.22em; color: var(--gold); margin-bottom: 14px;
+  }
+  .script-quote {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 21px; line-height: 1.45; color: white;
+  }
+  .script-breakdown {
+    margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.15);
+    font-family: var(--font-body); font-size: 13px; color: var(--cream-dk); line-height: 1.55;
+  }
+  .script-breakdown strong { color: var(--gold); }
+
+  /* assignment / next steps */
+  .assignment {
+    background: white;
+    border: 1px solid var(--cream-dk);
+    padding: 28px 32px;
+    margin-top: 32px;
+  }
+  .assignment ol { margin: 16px 0 0 22px; }
+  .assignment ol li {
+    margin-bottom: 14px;
+    color: var(--ink-soft); font-size: 15px; line-height: 1.6;
+  }
+  .assignment ol li strong { color: var(--navy); }
+
+  .actions {
+    display: flex; gap: 12px; justify-content: flex-end;
+    margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--rule);
+  }
+
+  .signature {
+    margin-top: 56px; padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--font-body); font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--slate);
+  }
+  .signature .left { color: var(--gold); font-weight: 700; }
+
+  .hint {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 13px; color: var(--red); margin-top: 6px;
+  }
+
+  /* show/hide for model-specific content — toggled via JS .hidden class */
+  .onetime-only, .recurring-only { display: none; }
+  .onetime-only.show, .recurring-only.show { display: block; }
+  .onetime-only.show.inline, .recurring-only.show.inline { display: inline; }
+
+  /* ---------- print styles ---------- */
+  @media print {
+    @page { margin: 0.6in; size: letter; }
+    body { background: white; font-size: 11pt; }
+    .frame { padding: 0; max-width: none; }
+    .panel, .progress, .progress-label, .actions, .nav, .masthead { display: none !important; }
+    .strategy { display: block !important; }
+    .strategy-title { font-size: 32pt; }
+    .panel-title, .section-title { font-size: 18pt; }
+    .formula-box, .cycle-viz, .verdict, .lever, .assignment, .script-box, .advantage-callout, .stat {
+      page-break-inside: avoid;
+      box-shadow: none;
+    }
+    .section { margin-bottom: 28px; }
+    .signature { page-break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+<!-- ============ MASTHEAD ============ -->
+<header class="masthead" id="masthead">
+  <div class="brand-stripe">FOUNDERSPATH  ·  SELF-FUNDING WORKSHEET</div>
+  <h1 class="title">Designing Your Business<br>to <em>Self-Fund</em></h1>
+  <p class="deck">Map your numbers. Get a strategy specific to your business — whether you sell one-time, charge a monthly fee, or do both.</p>
+</header>
+
+<!-- ============ PROGRESS ============ -->
+<div id="progress-wrap">
+  <div class="progress">
+    <div class="progress-step active" data-step="1"></div>
+    <div class="progress-step" data-step="2"></div>
+    <div class="progress-step" data-step="3"></div>
+  </div>
+  <div class="progress-label">
+    <span class="current">01 — Your Business</span>
+    <span>02 — Your Cash Timing</span>
+    <span>03 — Diagnostic</span>
+  </div>
+</div>
+
+<!-- ============ PANEL 1: BUSINESS BASICS ============ -->
+<section class="panel active" id="panel-1">
+  <div class="panel-header">
+    <div class="panel-eyebrow">STEP ONE  ·  YOUR BUSINESS</div>
+    <h2 class="panel-title">Tell me what you sell.</h2>
+    <p class="panel-intro">Don't have an exact number? Estimate it. Better to start with a rough number and refine it than to skip the worksheet because you don't have a perfect one.</p>
+  </div>
+
+  <div class="field">
+    <label class="field-label" for="biz-name">Business or product name</label>
+    <p class="field-help">Used in your strategy document. Whatever you'd call it talking to a friend.</p>
+    <input type="text" id="biz-name" placeholder="e.g., Eastside Strength &amp; Conditioning">
+  </div>
+
+  <div class="field">
+    <label class="field-label">How does your business mostly make money?</label>
+    <p class="field-help">Pick the one that fits best. This changes which numbers you'll enter next.</p>
+    <div class="model-picker">
+      <label class="model-option">
+        <input type="radio" name="model" value="onetime">
+        <div class="model-option-label">One-time sales</div>
+        <div class="model-option-help">Customer pays per purchase. e.g., a product, a project, a kit, a one-off service.</div>
+      </label>
+      <label class="model-option">
+        <input type="radio" name="model" value="recurring">
+        <div class="model-option-label">Recurring / membership</div>
+        <div class="model-option-help">Customer pays a monthly fee. e.g., a gym, a SaaS app, a coaching retainer, a subscription box.</div>
+      </label>
+      <label class="model-option">
+        <input type="radio" name="model" value="mixed">
+        <div class="model-option-label">A mix of both</div>
+        <div class="model-option-help">Recurring plus add-ons. e.g., a gym with personal training, SaaS with setup fees, a retainer plus project work.</div>
+      </label>
+    </div>
+    <p class="hint" id="model-hint" hidden>Please pick one to continue.</p>
+  </div>
+
+  <!-- ============ ONE-TIME / MIXED INPUTS ============ -->
+  <div class="sub-card onetime-only">
+    <div class="sub-card-tag">ONE-TIME SALES</div>
+    <div class="sub-card-title onetime-only">Your one-time sales numbers.</div>
+    <div class="sub-card-title recurring-only">Your add-on / one-time sales (optional).</div>
+    <p class="sub-card-help onetime-only">What does the average customer transaction look like?</p>
+    <p class="sub-card-help recurring-only">For your add-ons or one-off products on top of the membership. Skip if you don't have any.</p>
+
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label" for="price-per">Average price per sale</label>
+        <p class="field-example">Gym: a personal training session ($75). Kit business: a single kit ($109). Agency: a project ($5,000).</p>
+        <div class="currency-prefix">
+          <input type="number" id="price-per" placeholder="0" min="0" step="any">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="margin-pct">Gross margin per sale (%)</label>
+        <p class="field-example">After cost of delivering it. Trainer pay, materials, fulfillment. Not net of overhead like rent.</p>
+        <input type="number" id="margin-pct" placeholder="0" min="0" max="100" step="any">
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:0;">
+      <label class="field-label" for="sales-per-month">Roughly how many of these per month right now?</label>
+      <p class="field-example">Estimate is fine. If you're brand new, put what you're targeting.</p>
+      <input type="number" id="sales-per-month" placeholder="0" min="0" step="any">
+    </div>
+  </div>
+
+  <!-- ============ RECURRING / MIXED INPUTS ============ -->
+  <div class="sub-card recurring-only">
+    <div class="sub-card-tag">RECURRING REVENUE</div>
+    <div class="sub-card-title">Your recurring revenue numbers.</div>
+    <p class="sub-card-help">Members, subscribers, monthly retainers — the predictable part.</p>
+
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label" for="price-monthly">Average monthly fee per customer</label>
+        <p class="field-example">Gym: average membership ($89). SaaS: average plan ($49). Coaching retainer ($1,200).</p>
+        <div class="currency-prefix">
+          <input type="number" id="price-monthly" placeholder="0" min="0" step="any">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="margin-recurring-pct">Gross margin per member / month (%)</label>
+        <p class="field-example">After variable costs of serving them. Software hosting, class instructor pay, member supplies. Not rent or fixed payroll.</p>
+        <input type="number" id="margin-recurring-pct" placeholder="0" min="0" max="100" step="any">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label" for="active-members">Active members / subscribers right now</label>
+        <p class="field-example">If you're brand new, put what you have today even if it's a small number. Or your near-term target.</p>
+        <input type="number" id="active-members" placeholder="0" min="0" step="any">
+      </div>
+      <div class="field">
+        <label class="field-label" for="churn-pct">Monthly churn rate (%)</label>
+        <p class="field-example">What % of members cancel each month? Gyms typically 4–7%. SaaS varies wildly. If you don't know, estimate 5%.</p>
+        <input type="number" id="churn-pct" placeholder="5" min="0" max="100" step="any">
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:0;">
+      <label class="field-label" for="signup-fee">Up-front signup or setup fee, if any</label>
+      <p class="field-example">Gym initiation fee, SaaS onboarding fee, retainer first-month-deposit. Enter 0 if none.</p>
+      <div class="currency-prefix">
+        <input type="number" id="signup-fee" placeholder="0" min="0" step="any">
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FIXED COSTS (ALWAYS SHOWN) ============ -->
+  <div class="sub-card optional">
+    <div class="sub-card-tag" style="background: var(--navy);">YOUR FIXED COSTS</div>
+    <div class="sub-card-title">What you owe every month, no matter what.</div>
+    <p class="sub-card-help">Rent, salaried payroll, software subscriptions, insurance — the costs that arrive whether or not you make a sale this month.</p>
+
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label" for="fixed-monthly">Total fixed monthly cost</label>
+        <p class="field-example">Add it all up. Be honest — include your own draw if you're paying yourself.</p>
+        <div class="currency-prefix">
+          <input type="number" id="fixed-monthly" placeholder="0" min="0" step="any">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="reserves">Cash reserves available (optional)</label>
+        <p class="field-example">Money you'd actually use to bridge a gap. Skip if you'd rather not say.</p>
+        <div class="currency-prefix">
+          <input type="number" id="reserves" placeholder="0" min="0" step="any">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <span></span>
+    <button class="btn btn-primary" onclick="goTo(2)">Continue  →</button>
+  </div>
+</section>
+
+<!-- ============ PANEL 2: CASH TIMING ============ -->
+<section class="panel" id="panel-2">
+  <div class="panel-header">
+    <div class="panel-eyebrow">STEP TWO  ·  YOUR CASH TIMING</div>
+    <h2 class="panel-title onetime-only">When does the money show up?</h2>
+    <h2 class="panel-title recurring-only">How does your billing work?</h2>
+    <p class="panel-intro onetime-only">For one-time sales, the gap between spending and collecting is what determines whether you can self-fund. Map it in days.</p>
+    <p class="panel-intro recurring-only">For a membership business, payment timing is usually a strength — most members are on autopay. We need to capture a few details to use it.</p>
+  </div>
+
+  <!-- ONE-TIME CYCLE -->
+  <div class="onetime-only">
+    <div class="field">
+      <label class="field-label" for="day-spend">Days from sale to first money out</label>
+      <p class="field-example">When does your money first leave the account? Day 0 if you pay upfront. Skip ahead if you don't have material costs to fund.</p>
+      <input type="number" id="day-spend" placeholder="0" min="0" step="1">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="day-deliver">Days from sale to delivery complete</label>
+      <p class="field-example">When the customer actually has what they paid for. Project finished, kit shipped, training session held.</p>
+      <input type="number" id="day-deliver" placeholder="0" min="0" step="1">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="day-collect">Days from sale to cash in your account</label>
+      <p class="field-example">Be honest about what you actually collect on, not what's printed on the invoice. If the customer pays at point of sale, that's day 0.</p>
+      <input type="number" id="day-collect" placeholder="0" min="0" step="1">
+    </div>
+  </div>
+
+  <!-- RECURRING TIMING -->
+  <div class="recurring-only">
+    <div class="field">
+      <label class="field-label" for="payment-method">How do members pay you?</label>
+      <p class="field-help">Pick the closest match. This affects how reliable your monthly cash arrival is.</p>
+      <select id="payment-method">
+        <option value="autopay">Autopay / automatic charge (credit card, ACH on file)</option>
+        <option value="manual">Members pay each month manually (invoice, e-transfer, check)</option>
+        <option value="annual-up-front">Annual or quarterly paid up front</option>
+        <option value="mixed-billing">Mixed — some autopay, some manual</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="billing-day">When does monthly billing hit?</label>
+      <p class="field-help">Pick the closest answer.</p>
+      <select id="billing-day">
+        <option value="signup-anniversary">On each member's signup anniversary (rolling)</option>
+        <option value="first-of-month">All on the same day (e.g., 1st of the month)</option>
+        <option value="varies">It varies / not sure</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="failed-pct">Roughly what % of monthly charges fail or need retrying?</label>
+      <p class="field-example">Expired cards, declined charges, members who switched banks. SaaS norm is 1–4%. Gyms can be higher. Estimate is fine.</p>
+      <input type="number" id="failed-pct" placeholder="2" min="0" max="100" step="any">
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="btn btn-secondary" onclick="goTo(1)">←  Back</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Continue  →</button>
+  </div>
+</section>
+
+<!-- ============ PANEL 3: DIAGNOSTIC ============ -->
+<section class="panel" id="panel-3">
+  <div class="panel-header">
+    <div class="panel-eyebrow">STEP THREE  ·  THE DIAGNOSTIC</div>
+    <h2 class="panel-title">Three questions. Answer honestly.</h2>
+    <p class="panel-intro">Two or three "no" answers means you're building a business that needs outside capital — which is a legitimate choice, but it should be a deliberate one, not a surprise in month six.</p>
+  </div>
+
+  <div class="diag-question">
+    <div class="diag-q-num">Question 01  ·  Margin</div>
+    <div class="diag-q-text onetime-only">Does each sale make enough money — after the cost of delivering it — to actually matter?</div>
+    <div class="diag-q-text recurring-only">Does each member contribute enough each month — after serving them — to actually matter?</div>
+    <p class="diag-q-example onetime-only">A $100 sale at 20% margin contributes $20. To cover $5,000 of fixed cost you'd need 250 sales. If 250 isn't realistic, the answer is no.</p>
+    <p class="diag-q-example recurring-only">A $50 membership at 70% margin contributes $35. To cover $5,000 of fixed cost you'd need 143 active members. If that's not realistic, the answer is no.</p>
+    <div class="diag-options">
+      <label><input type="radio" name="q1" value="yes"><span>Yes</span></label>
+      <label><input type="radio" name="q1" value="no"><span>No</span></label>
+    </div>
+  </div>
+
+  <div class="diag-question">
+    <div class="diag-q-num">Question 02  ·  Timing</div>
+    <div class="diag-q-text onetime-only">Does cash arrive in time to fund the next round of costs?</div>
+    <div class="diag-q-text recurring-only">Is most of your monthly revenue reliable — autopay or contracts that just renew?</div>
+    <p class="diag-q-example onetime-only">If you're spending in week 1 and collecting in week 12 with payroll every two weeks, the answer is probably no — even if margins look fine.</p>
+    <p class="diag-q-example recurring-only">If 90%+ of members are on autopay or annual contracts that auto-renew, yes. If you have to chase invoices each month, no.</p>
+    <div class="diag-options">
+      <label><input type="radio" name="q2" value="yes"><span>Yes</span></label>
+      <label><input type="radio" name="q2" value="no"><span>No</span></label>
+    </div>
+  </div>
+
+  <div class="diag-question">
+    <div class="diag-q-num">Question 03  ·  Volume</div>
+    <div class="diag-q-text onetime-only">Is there a realistic path to the sales volume that covers your fixed costs?</div>
+    <div class="diag-q-text recurring-only">Is there a realistic path to the active member count that covers your fixed costs?</div>
+    <p class="diag-q-example onetime-only">"Realistic" means with your current capacity, marketing channels, and pipeline. Not "if everything goes great."</p>
+    <p class="diag-q-example recurring-only">"Realistic" means net of churn, with your current acquisition channels and capacity. Not "if everything goes great."</p>
+    <div class="diag-options">
+      <label><input type="radio" name="q3" value="yes"><span>Yes</span></label>
+      <label><input type="radio" name="q3" value="no"><span>No</span></label>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="btn btn-secondary" onclick="goTo(2)">←  Back</button>
+    <button class="btn btn-primary" id="generate-btn" onclick="generateStrategy()">Generate My Strategy  →</button>
+  </div>
+  <p class="hint" id="diag-hint" hidden style="text-align:right;">Please answer all three questions before generating your strategy.</p>
+</section>
+
+<!-- ============ STRATEGY OUTPUT ============ -->
+<section class="strategy" id="strategy"></section>
+
+</div>
+
+<script>
+  // ---------- state ----------
+  let currentStep = 1;
+  let businessModel = null;
+
+  // ---------- model selection -> show/hide sections ----------
+  function applyModelVisibility(model) {
+    // remove all show classes first
+    document.querySelectorAll('.onetime-only.show, .recurring-only.show').forEach(el => el.classList.remove('show'));
+    if (!model) return;
+    if (model === 'onetime' || model === 'mixed') {
+      document.querySelectorAll('.onetime-only').forEach(el => el.classList.add('show'));
+    }
+    if (model === 'recurring' || model === 'mixed') {
+      document.querySelectorAll('.recurring-only').forEach(el => el.classList.add('show'));
+    }
+  }
+
+  document.querySelectorAll('input[name="model"]').forEach(r => {
+    r.addEventListener('change', e => {
+      businessModel = e.target.value;
+      applyModelVisibility(businessModel);
+      document.getElementById('model-hint').hidden = true;
+    });
+  });
+
+  // ---------- navigation ----------
+  function goTo(n) {
+    if (n > currentStep && !validate(currentStep)) return;
+    currentStep = n;
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + n).classList.add('active');
+    updateProgress(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress(n) {
+    document.querySelectorAll('.progress-step').forEach(s => {
+      const step = parseInt(s.dataset.step);
+      s.classList.remove('active', 'done');
+      if (step < n) s.classList.add('done');
+      else if (step === n) s.classList.add('active');
+    });
+    const labels = document.querySelectorAll('.progress-label span');
+    labels.forEach((l, i) => l.classList.toggle('current', (i + 1) === n));
+  }
+
+  function validate(step) {
+    if (step === 1) {
+      if (!businessModel) {
+        document.getElementById('model-hint').hidden = false;
+        document.querySelector('.model-picker').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+      }
+      const bizName = document.getElementById('biz-name');
+      if (!bizName.value.trim()) {
+        bizName.focus();
+        return false;
+      }
+      if (businessModel === 'onetime') {
+        for (const id of ['price-per', 'margin-pct', 'sales-per-month']) {
+          const el = document.getElementById(id);
+          if (!el.value || el.value === '') { el.focus(); return false; }
+        }
+      }
+      if (businessModel === 'recurring' || businessModel === 'mixed') {
+        for (const id of ['price-monthly', 'margin-recurring-pct', 'active-members']) {
+          const el = document.getElementById(id);
+          if (!el.value || el.value === '') { el.focus(); return false; }
+        }
+      }
+      const fixedMonthly = document.getElementById('fixed-monthly');
+      if (!fixedMonthly.value || fixedMonthly.value === '') {
+        fixedMonthly.focus();
+        return false;
+      }
+      return true;
+    }
+    if (step === 2) {
+      if (businessModel === 'onetime') {
+        const dc = document.getElementById('day-collect');
+        if (dc.value === '' || dc.value === null) { dc.focus(); return false; }
+      }
+      return true;
+    }
+    return true;
+  }
+
+  // ---------- generate strategy ----------
+  function generateStrategy() {
+    const q1 = document.querySelector('input[name="q1"]:checked');
+    const q2 = document.querySelector('input[name="q2"]:checked');
+    const q3 = document.querySelector('input[name="q3"]:checked');
+    if (!q1 || !q2 || !q3) {
+      document.getElementById('diag-hint').hidden = false;
+      return;
+    }
+
+    const data = collect();
+    document.getElementById('strategy').innerHTML = renderStrategy(data);
+    document.getElementById('strategy').classList.add('active');
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function collect() {
+    const num = id => {
+      const el = document.getElementById(id);
+      const v = parseFloat(el.value);
+      return isNaN(v) ? 0 : v;
+    };
+    const str = id => document.getElementById(id).value.trim();
+    const sel = id => document.getElementById(id).value;
+    return {
+      model: businessModel,
+      bizName: str('biz-name'),
+      // one-time
+      pricePer: num('price-per'),
+      marginPct: num('margin-pct'),
+      salesPerMonth: num('sales-per-month'),
+      // recurring
+      priceMonthly: num('price-monthly'),
+      marginRecurringPct: num('margin-recurring-pct'),
+      activeMembers: num('active-members'),
+      churnPct: num('churn-pct') || 5,
+      signupFee: num('signup-fee'),
+      // fixed
+      fixedMonthly: num('fixed-monthly'),
+      reserves: num('reserves'),
+      // timing
+      daySpend: num('day-spend'),
+      dayDeliver: num('day-deliver'),
+      dayCollect: num('day-collect'),
+      paymentMethod: sel('payment-method'),
+      billingDay: sel('billing-day'),
+      failedPct: num('failed-pct') || 2,
+      // diagnostic
+      q1: document.querySelector('input[name="q1"]:checked').value,
+      q2: document.querySelector('input[name="q2"]:checked').value,
+      q3: document.querySelector('input[name="q3"]:checked').value
+    };
+  }
+
+  // ---------- strategy rendering ----------
+  function renderStrategy(d) {
+    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // --- compute the right break-even based on model ---
+    const grossPerSale = d.pricePer * (d.marginPct / 100);
+    const grossPerMember = d.priceMonthly * (d.marginRecurringPct / 100);
+    const breakEvenSales = grossPerSale > 0 ? Math.ceil(d.fixedMonthly / grossPerSale) : 0;
+    const breakEvenMembers = grossPerMember > 0 ? Math.ceil(d.fixedMonthly / grossPerMember) : 0;
+
+    // for mixed: figure out blended contribution
+    const monthlyRevenueOneTime = d.pricePer * d.salesPerMonth;
+    const monthlyMarginOneTime = grossPerSale * d.salesPerMonth;
+    const monthlyRevenueRecurring = d.priceMonthly * d.activeMembers;
+    const monthlyMarginRecurring = grossPerMember * d.activeMembers;
+    const totalMonthlyMargin = monthlyMarginOneTime + monthlyMarginRecurring;
+    const coverageRatio = d.fixedMonthly > 0 ? (totalMonthlyMargin / d.fixedMonthly) : 0;
+
+    // gap to break-even — for recurring, calculate "members still needed"
+    const membersNeeded = Math.max(0, breakEvenMembers - d.activeMembers);
+    const salesNeeded = Math.max(0, breakEvenSales - d.salesPerMonth);
+
+    // churn replacement burn (recurring)
+    const monthlyChurnLoss = d.activeMembers * (d.churnPct / 100);
+
+    // cash cycle (one-time only)
+    const cycleDays = d.dayCollect - d.daySpend;
+    const monthsRunway = (d.reserves > 0 && d.fixedMonthly > 0) ? (d.reserves / d.fixedMonthly) : null;
+    const noCount = [d.q1, d.q2, d.q3].filter(v => v === 'no').length;
+
+    // verdict
+    let verdictClass, verdictLabel, verdictHead, verdictBody;
+    if (noCount === 0) {
+      verdictClass = 'green';
+      verdictLabel = 'THREE YESES  ·  SELF-FUNDING VIABLE';
+      verdictHead = "Your model can fund itself. Your job now is to build the discipline.";
+      verdictBody = "All three structural conditions are in place: margin, timing, and volume. The risk shifts from \"can I get there?\" to \"will I execute consistently?\" Use the levers below to compound the advantage you already have.";
+    } else if (noCount === 1) {
+      verdictClass = 'amber';
+      verdictLabel = 'ONE NO  ·  STRUCTURAL FIX REQUIRED';
+      verdictHead = "Your model is close. One specific lever closes the gap.";
+      verdictBody = "You have a fixable structural problem. The lever that addresses your specific 'no' is highlighted below — work that one first. Don't try to fix all three at once. The diagnostic is telling you exactly where to spend your effort.";
+    } else {
+      verdictClass = 'red';
+      verdictLabel = noCount === 2 ? 'TWO NOS  ·  CAPITAL DECISION POINT' : 'THREE NOS  ·  CAPITAL REQUIRED';
+      verdictHead = "You're building a business that needs outside capital. Make it a deliberate choice.";
+      verdictBody = "This is a legitimate path — but it should be a decision you make in advance, not a surprise you discover when reserves run out. The levers below can still extend your runway and improve the terms you'll eventually raise on. The worst version is hybrid by accident.";
+    }
+
+    // lever recommendations
+    const isRecurring = d.model === 'recurring' || d.model === 'mixed';
+    const isOneTime = d.model === 'onetime' || d.model === 'mixed';
+
+    // for one-time: recommend lever 1 if cycle > 30 days or q2 is no
+    const recommendL1_collection = isOneTime && (cycleDays > 30 || d.q2 === 'no');
+    // for recurring: recommend lever 1 if not on autopay, or many failed payments
+    const recommendL1_billing = isRecurring && (d.paymentMethod !== 'autopay' || d.failedPct > 4);
+    // lever 2: spend-before-revenue (one-time only)
+    const recommendL2 = isOneTime && d.daySpend < 14 && cycleDays > 30;
+    // lever 3: margin
+    const recommendL3 = d.q1 === 'no';
+    // lever 4 (recurring only): churn reduction — recommended if churn > 5%
+    const recommendL4 = isRecurring && d.churnPct > 5;
+
+    // discount script (one-time + recommend)
+    const earlyPayDiscount = 2;
+    const discountAmount = (d.pricePer * (earlyPayDiscount / 100)).toFixed(2);
+
+    // ---------------- HTML build ----------------
+
+    let html = `
+      <header class="strategy-masthead">
+        <div class="brand-stripe">FOUNDERSPATH  ·  SELF-FUNDING STRATEGY</div>
+        <h1 class="strategy-title">Strategy for<br><em>${escape(d.bizName)}</em></h1>
+        <p class="strategy-sub">${
+          d.model === 'onetime' ? 'One-time sales business' :
+          d.model === 'recurring' ? 'Recurring revenue / membership business' :
+          'Hybrid business — recurring revenue with one-time add-ons'
+        }</p>
+        <div class="strategy-meta">
+          <span>Generated<strong>${today}</strong></span>
+          <span>Fixed Cost<strong>$${fmt(d.fixedMonthly)} / mo</strong></span>
+          ${monthsRunway !== null && monthsRunway > 0 ? `<span>Runway<strong>${monthsRunway.toFixed(1)} months</strong></span>` : ''}
+        </div>
+      </header>
+    `;
+
+    // ----- BREAK-EVEN SECTION -----
+    html += `
+      <div class="section">
+        <div class="section-eyebrow">YOUR BREAK-EVEN NUMBER</div>
+        <h2 class="section-title">The floor your business has to clear, every month, before anything else.</h2>
+    `;
+
+    if (d.model === 'onetime') {
+      html += `
+        <div class="formula-box">
+          <div class="formula-label">SELF-FUNDING THRESHOLD</div>
+          <div class="formula-body">
+            $${fmt(d.fixedMonthly)} (fixed monthly cost)<br>
+            ÷ &nbsp;$${grossPerSale.toFixed(2)} (margin per sale)
+          </div>
+          <div class="formula-result">
+            ${fmt(breakEvenSales)} sales / month
+            <em>≈ $${fmt(breakEvenSales * d.pricePer)} in revenue, collected on time</em>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-label">Sales / mo today</div>
+            <div class="stat-value">${fmt(d.salesPerMonth)}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Sales / mo needed</div>
+            <div class="stat-value">${fmt(breakEvenSales)}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Gap to close</div>
+            <div class="stat-value" style="color: ${salesNeeded > 0 ? 'var(--red)' : 'var(--teal)'};">${salesNeeded > 0 ? '+' + fmt(salesNeeded) : '✓ Covered'}</div>
+            <div class="stat-sub">${salesNeeded > 0 ? 'sales / month' : 'self-funding today'}</div>
+          </div>
+        </div>
+
+        <p>Most founders never calculate this. They hire on hope and discover the requirement when the bank account forces it. <strong>You now know what your floor is.</strong> Set every team member's milestone in terms of sales closed and collected — not conversations had, leads in the pipeline, or activity reports.</p>
+      `;
+    } else if (d.model === 'recurring') {
+      html += `
+        <div class="formula-box">
+          <div class="formula-label">SELF-FUNDING THRESHOLD  ·  ACTIVE MEMBER COUNT</div>
+          <div class="formula-body">
+            $${fmt(d.fixedMonthly)} (fixed monthly cost)<br>
+            ÷ &nbsp;$${grossPerMember.toFixed(2)} (margin per member / month)
+          </div>
+          <div class="formula-result">
+            ${fmt(breakEvenMembers)} active members
+            <em>= the number you need on the books at any given moment</em>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-label">Active members today</div>
+            <div class="stat-value">${fmt(d.activeMembers)}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Members needed</div>
+            <div class="stat-value">${fmt(breakEvenMembers)}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Gap to close</div>
+            <div class="stat-value" style="color: ${membersNeeded > 0 ? 'var(--red)' : 'var(--teal)'};">${membersNeeded > 0 ? '+' + fmt(membersNeeded) : '✓ Covered'}</div>
+            <div class="stat-sub">${membersNeeded > 0 ? 'members to add' : 'self-funding today'}</div>
+          </div>
+        </div>
+
+        <p>Recurring revenue makes the math easier in one specific way: <strong>once a member is on the books, they continue contributing every month until they leave.</strong> But that same property is the trap — you only need to lose ${fmt(monthlyChurnLoss > 0 ? Math.ceil(monthlyChurnLoss) : 0)} members per month to ${d.churnPct}% churn just to stand still. Growth is gross signups <em>minus</em> churn, not gross signups.</p>
+
+        <p><strong>Your acquisition target isn't ${fmt(membersNeeded)} new members. It's ${fmt(membersNeeded)} <em>net</em> new members</strong> — meaning you need to add ${fmt(Math.ceil(membersNeeded + monthlyChurnLoss))} gross to overcome churn and reach break-even.</p>
+      `;
+    } else {
+      // mixed
+      html += `
+        <p>Your business has two revenue streams. The math is below for each, with a combined view at the bottom.</p>
+
+        <div class="formula-dual">
+          <div class="formula-box">
+            <div class="formula-label">RECURRING SIDE</div>
+            <div class="formula-body" style="font-size:18px;">
+              Margin per member: $${grossPerMember.toFixed(2)} / mo
+            </div>
+            <div class="formula-result">
+              ${fmt(breakEvenMembers)} members
+              <em>to cover fixed costs from recurring alone</em>
+            </div>
+          </div>
+          <div class="formula-box" style="background: white; border-color: var(--cream-dk);">
+            <div class="formula-label" style="color: var(--navy-2);">ONE-TIME SIDE</div>
+            <div class="formula-body" style="font-size:18px;">
+              Margin per sale: $${grossPerSale.toFixed(2)}
+            </div>
+            <div class="formula-result" style="color: var(--ink-soft);">
+              ${fmt(breakEvenSales)} sales
+              <em>to cover fixed costs from one-time alone</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-label">Recurring margin</div>
+            <div class="stat-value">$${fmt(monthlyMarginRecurring)}</div>
+            <div class="stat-sub">${fmt(d.activeMembers)} members × $${grossPerMember.toFixed(2)}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">One-time margin</div>
+            <div class="stat-value">$${fmt(monthlyMarginOneTime)}</div>
+            <div class="stat-sub">${fmt(d.salesPerMonth)} sales × $${grossPerSale.toFixed(2)}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Coverage ratio</div>
+            <div class="stat-value" style="color: ${coverageRatio >= 1 ? 'var(--teal)' : 'var(--red)'};">${(coverageRatio * 100).toFixed(0)}%</div>
+            <div class="stat-sub">of $${fmt(d.fixedMonthly)} fixed cost</div>
+          </div>
+        </div>
+
+        <p>${coverageRatio >= 1
+          ? '<strong>Combined, your two revenue streams are covering fixed costs.</strong> The strategic question now is mix — which side to grow first to pull further away from the floor. The recurring side compounds (members add up); the one-time side scales with sales effort.'
+          : `<strong>Combined, your two streams are covering ${(coverageRatio * 100).toFixed(0)}% of fixed cost.</strong> You need to close the remaining $${fmt(d.fixedMonthly - totalMonthlyMargin)} per month of margin — through more members, more sales, or both. The fastest path depends on which side has more headroom.`
+        }</p>
+      `;
+    }
+
+    html += `</div>`;
+
+    // ----- CASH TIMING / CYCLE SECTION -----
+    html += `
+      <div class="section">
+        <div class="section-eyebrow">YOUR CASH TIMING</div>
+    `;
+
+    if (d.model === 'onetime') {
+      const cycleEnd = Math.max(d.dayCollect, d.dayDeliver, 30);
+      const pct = day => (day / cycleEnd) * 100;
+
+      html += `
+        <h2 class="section-title">The gap your business has to bridge.</h2>
+
+        <div class="cycle-viz">
+          <div class="cycle-viz-header">
+            <div class="cycle-viz-title">Sale → Cash Collected</div>
+            <div class="cycle-viz-total">Total cycle: <strong>${cycleDays} days</strong></div>
+          </div>
+
+          <div class="cycle-bar">
+            ${d.daySpend < d.dayCollect ? `<div class="cycle-gap" style="left: ${pct(d.daySpend)}%; right: ${100 - pct(d.dayCollect)}%;"></div>` : ''}
+            <div class="cycle-event spend" style="left: ${pct(d.daySpend)}%;">
+              <div class="cycle-event-label">Spend  ·  Day ${d.daySpend}</div>
+            </div>
+            ${d.dayDeliver !== d.daySpend && d.dayDeliver !== d.dayCollect ? `<div class="cycle-event" style="left: ${pct(d.dayDeliver)}%;">
+              <div class="cycle-event-label">Deliver  ·  Day ${d.dayDeliver}</div>
+            </div>` : ''}
+            <div class="cycle-event collect" style="left: ${pct(d.dayCollect)}%;">
+              <div class="cycle-event-label">Collect  ·  Day ${d.dayCollect}</div>
+            </div>
+          </div>
+          <div class="cycle-axis">
+            <span>Day 0</span>
+            <span>Day ${Math.round(cycleEnd / 2)}</span>
+            <span>Day ${cycleEnd}</span>
+          </div>
+        </div>
+
+        <p>You spend on day ${d.daySpend}. You collect on day ${d.dayCollect}. <strong>That's a ${cycleDays}-day gap.</strong> ${cycleDays > 60 ? "That gap is wide. It's the kind of gap that ends businesses that didn't model it." : cycleDays > 30 ? "That gap is meaningful. It's manageable, but only if you design around it." : cycleDays > 0 ? "That gap is short — your business has structural cash advantage. Most founders would trade you for it." : "You're collecting at or before you spend. That's the strongest possible cash position."}</p>
+      `;
+    } else if (d.model === 'recurring') {
+      // recurring: show advantage callout if mostly autopay, warning if not
+      const isAutopay = d.paymentMethod === 'autopay';
+      const isAnnual = d.paymentMethod === 'annual-up-front';
+      const isManual = d.paymentMethod === 'manual';
+
+      if (isAutopay || isAnnual) {
+        html += `
+          <h2 class="section-title">Your timing is a structural advantage.</h2>
+          <div class="advantage-callout">
+            <div class="advantage-label">CASH TIMING  ·  STRENGTH</div>
+            <div class="advantage-headline">${isAnnual ? 'You get cash up front.' : 'You collect before you spend.'}</div>
+            <div class="advantage-body">
+              ${isAnnual
+                ? `Annual or quarterly billing means cash arrives months before the cost of serving members hits. This is the strongest cash position a recurring business can have. Protect it — don't let salespeople negotiate it away to close a deal.`
+                : `Autopay means cash arrives on a predictable schedule, every month, without you having to ask. The only question is what % fails — and at ${d.failedPct}%, your timing is ${d.failedPct < 3 ? 'excellent' : d.failedPct < 6 ? 'normal' : 'higher than typical and worth investigating'}.`}
+            </div>
+          </div>
+          ${d.failedPct > 3 ? `<p>That said — every failed charge is a member who may not come back. At ${d.failedPct}% monthly fail rate on ${fmt(d.activeMembers)} members, you're losing roughly <strong>${fmt(Math.ceil(d.activeMembers * d.failedPct / 100))} payment attempts a month</strong> to expired cards or declines. A retry sequence + dunning emails typically recovers 30–50% of those. Lever 1 below is about that.</p>` : `<p>At ${d.failedPct}% fail rate, your billing infrastructure is doing its job. Keep it that way as you scale — failed-payment rate tends to creep up unnoticed when member counts grow faster than payment ops attention.</p>`}
+        `;
+      } else if (isManual) {
+        html += `
+          <h2 class="section-title">Manual billing is your biggest hidden cost.</h2>
+          <div class="verdict amber">
+            <div class="verdict-label">CASH TIMING  ·  ATTENTION REQUIRED</div>
+            <div class="verdict-headline">Manual collection turns a recurring business into an invoice business.</div>
+            <div class="verdict-body">Every month, you have to chase. Members forget. Some pay late. Some drift away. The number of members on the books is fiction; the number who actually paid this month is the truth — and it's always lower. This is fixable in a single decision: move everyone to autopay. Lever 1 below is the script for that conversation.</div>
+          </div>
+        `;
+      } else {
+        html += `
+          <h2 class="section-title">Mixed billing creates a hidden gap.</h2>
+          <div class="verdict amber">
+            <div class="verdict-label">CASH TIMING  ·  PARTIAL EXPOSURE</div>
+            <div class="verdict-headline">Some members are paying reliably; others aren't.</div>
+            <div class="verdict-body">The autopay portion of your base is doing fine. The manual portion is creating predictable churn and unpredictable cash. The fastest improvement is converting manual payers to autopay, one segment at a time. Lever 1 below addresses this.</div>
+          </div>
+        `;
+      }
+
+      if (monthsRunway !== null && monthsRunway > 0) {
+        html += `<p>At your current burn, your reserves of $${fmt(d.reserves)} buy you approximately <strong>${monthsRunway.toFixed(1)} months</strong> if revenue went to zero. That's the actual length of time you have to make the membership math work.</p>`;
+      }
+    } else {
+      // mixed model
+      html += `
+        <h2 class="section-title">You have two cash patterns running at once.</h2>
+        <p>The recurring side ${d.paymentMethod === 'autopay' || d.paymentMethod === 'annual-up-front' ? '<strong>(predictable, autopay-driven)</strong>' : '<strong>(less predictable, partially manual)</strong>'} provides your base. The one-time side adds revenue but with a ${cycleDays}-day collection cycle on each sale. The recurring side is doing the work of stabilizing your cash position; the one-time side is doing the work of growth — but it carries the gap.</p>
+        ${monthsRunway !== null && monthsRunway > 0 ? `<p>At current burn, your reserves of $${fmt(d.reserves)} buy you approximately <strong>${monthsRunway.toFixed(1)} months</strong> if revenue went to zero.</p>` : ''}
+      `;
+    }
+
+    html += `</div>`;
+
+    // ----- DIAGNOSTIC VERDICT -----
+    html += `
+      <div class="section">
+        <div class="section-eyebrow">DIAGNOSTIC VERDICT</div>
+        <h2 class="section-title">Where your business stands today.</h2>
+
+        <div class="verdict ${verdictClass}">
+          <div class="verdict-label">${verdictLabel}</div>
+          <div class="verdict-headline">${verdictHead}</div>
+          <div class="verdict-body">${verdictBody}</div>
+        </div>
+
+        <p><strong>Your answers:</strong></p>
+        <p style="margin-left: 16px;">
+          <strong>Margin:</strong> ${d.q1 === 'yes' ? '✓ Yes — your margin per ' + (isRecurring && !isOneTime ? 'member' : 'sale') + ' supports realistic break-even volume.' : '✗ No — margin is too thin to make the volume math work.'}<br>
+          <strong>Timing:</strong> ${d.q2 === 'yes' ? '✓ Yes — cash arrives reliably enough to fund the next cycle of costs.' : '✗ No — cash arrival is too unreliable or too late.'}<br>
+          <strong>Volume:</strong> ${d.q3 === 'yes' ? '✓ Yes — there is a realistic path to the volume that covers fixed costs.' : '✗ No — the volume required is not realistic with current capacity.'}
+        </p>
+      </div>
+    `;
+
+    // ----- LEVERS -----
+    html += `
+      <div class="section">
+        <div class="section-eyebrow">YOUR LEVER PRIORITY</div>
+        <h2 class="section-title">Which levers to pull first — and why.</h2>
+        <p>Every business has a small number of structural levers that close a self-funding gap. Based on your inputs, here's the order to work them.</p>
+
+        <div class="levers">
+    `;
+
+    // Lever 1: Collection (one-time) OR Billing (recurring)
+    if (isOneTime && !isRecurring) {
+      html += `
+        <div class="lever ${recommendL1_collection ? 'recommended' : 'optional'}">
+          <div class="lever-num">Lever 01</div>
+          <span class="lever-tag">${recommendL1_collection ? 'Start Here' : 'Lower Priority'}</span>
+          <div class="lever-title">Accelerate collection.</div>
+          <div class="lever-body">
+            ${recommendL1_collection
+              ? `Your ${cycleDays}-day cycle is the main thing standing between you and self-funding. Move clients to net 15 wherever possible, or offer a 2% discount for 10-day payment. On a $${d.pricePer.toFixed(0)} sale that's a $${discountAmount} discount — for a timing improvement of weeks. The math almost always favors the discount.`
+              : `Your collection cycle isn't the bottleneck. Keep this in your back pocket — it's the cheapest insurance policy you can buy if a client ever drifts toward late-pay.`}
+          </div>
+        </div>
+      `;
+    } else if (isRecurring) {
+      html += `
+        <div class="lever ${recommendL1_billing ? 'recommended' : 'optional'}">
+          <div class="lever-num">Lever 01</div>
+          <span class="lever-tag">${recommendL1_billing ? 'Start Here' : 'Lower Priority'}</span>
+          <div class="lever-title">${d.paymentMethod === 'manual' ? 'Move members to autopay.' : d.paymentMethod === 'mixed-billing' ? 'Convert manual payers to autopay.' : 'Reduce failed-payment leakage.'}</div>
+          <div class="lever-body">
+            ${d.paymentMethod === 'manual'
+              ? `Manual collection is the single biggest hidden tax on a recurring business. Every month spent chasing payments is a month of energy not spent on growth. The conversation is simple: most members will move to autopay if you simply ask. Use the script below.`
+              : d.paymentMethod === 'mixed-billing'
+              ? `Each manual-pay member is roughly 2-3x more likely to churn than an autopay member. Your fastest stability win is converting them, one cohort at a time. Use the script below.`
+              : `At ${d.failedPct}% failed-payment rate, you're losing about ${fmt(Math.ceil(d.activeMembers * d.failedPct / 100))} payment attempts per month. A retry sequence (3 attempts over 7 days) plus pre-expiry email warnings to members typically recovers 30-50% of those.`}
+          </div>
+        </div>
+      `;
+    }
+
+    // Lever 2: Delay cost (one-time only — make it apply meaningfully)
+    if (isOneTime) {
+      html += `
+        <div class="lever ${recommendL2 ? 'recommended' : 'optional'}">
+          <div class="lever-num">Lever 02</div>
+          <span class="lever-tag">${recommendL2 ? 'Work This Next' : 'Lower Priority'}</span>
+          <div class="lever-title">Delay cost until revenue is confirmed.</div>
+          <div class="lever-body">
+            ${recommendL2
+              ? `You're spending on day ${d.daySpend} but collecting on day ${d.dayCollect}. Restructure where you can: drop-ship instead of stocking, deposit-on-order instead of paying suppliers upfront, milestone-based contractor pay. Push spend toward day ${Math.round(d.dayDeliver)} or later — closer to when revenue is more certain.`
+              : `Your spend timing is already disciplined. Keep it that way as you scale.`}
+          </div>
+        </div>
+      `;
+    }
+
+    // Lever 3: Margin
+    html += `
+      <div class="lever ${recommendL3 ? 'recommended' : 'optional'}">
+        <div class="lever-num">Lever 0${isOneTime ? '3' : '2'}</div>
+        <span class="lever-tag">${recommendL3 ? 'Address Structurally' : 'Lower Priority'}</span>
+        <div class="lever-title">Increase margin per ${isRecurring && !isOneTime ? 'member' : 'transaction'}.</div>
+        <div class="lever-body">
+          ${recommendL3
+            ? `Your margin makes the break-even volume too hard to reach. ${isRecurring ? 'Look at price (most recurring businesses underprice by 15-30%), tier mix (introduce a premium tier), or reducing the cost of serving members.' : 'Look at price (most one-time businesses underprice), channel mix (direct vs. wholesale), or reducing the cost of delivery.'} If margin can't move, the business may need a redesign rather than a tweak.`
+            : `Your margin is structurally healthy. The lever to use here later is mix — a higher-margin segment (premium tier, direct channel) raises blended margin without touching the price you've set.`}
+        </div>
+      </div>
+    `;
+
+    // Lever 4: Churn (recurring only)
+    if (isRecurring) {
+      const leverNum = isOneTime ? '04' : '03';
+      html += `
+        <div class="lever ${recommendL4 ? 'recommended' : 'optional'}">
+          <div class="lever-num">Lever ${leverNum}</div>
+          <span class="lever-tag">${recommendL4 ? 'Address Structurally' : 'Maintain'}</span>
+          <div class="lever-title">Reduce churn.</div>
+          <div class="lever-body">
+            ${recommendL4
+              ? `At ${d.churnPct}% monthly churn, you lose roughly ${fmt(Math.ceil(monthlyChurnLoss))} members every month before counting any new signups. That's the equivalent of needing to acquire ${fmt(Math.ceil(monthlyChurnLoss * 12))} members per year just to stand still. The two highest-leverage churn reducers are: (1) better onboarding in week one, and (2) catching disengaged members before they cancel. Worth more than acquisition for most recurring businesses.`
+              : `At ${d.churnPct}% monthly churn, your retention is in good shape. Don't take it for granted — track it monthly, and treat any uptick as a leading indicator of a deeper problem.`}
+          </div>
+        </div>
+      `;
+    }
+
+    html += `</div></div>`;
+
+    // ----- PERSONALIZED SCRIPTS -----
+    if (recommendL1_collection) {
+      html += `
+        <div class="section">
+          <div class="section-eyebrow">THE EARLY-PAY ASK  ·  YOUR SCRIPT</div>
+          <h2 class="section-title">Practice this until you can say it without flinching.</h2>
+          <p>The script below uses your numbers. Adapt the phrasing to your voice — but keep the structure. Each part is doing specific psychological work.</p>
+
+          <div class="script-box">
+            <div class="script-box-label">WHAT TO SAY</div>
+            <p class="script-quote">"Our standard terms are net 30. We also offer a ${earlyPayDiscount}% discount — about $${discountAmount} on a $${d.pricePer.toFixed(0)} order — for payment within 10 days. Most of our clients take it. Want me to set that up on your invoice?"</p>
+            <div class="script-breakdown">
+              <strong>Why it works:</strong> "Standard terms" frames net 30 as the default — not generous. "Most of our clients take it" makes saying yes the path of least resistance. "Want me to set that up" ends with an operational ask, not a price negotiation. Practice it out loud. The line works because it's flat, not because it's persuasive.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (recommendL1_billing && d.paymentMethod === 'manual') {
+      html += `
+        <div class="section">
+          <div class="section-eyebrow">THE AUTOPAY ASK  ·  YOUR SCRIPT</div>
+          <h2 class="section-title">The conversation that turns invoice-chasing into autopay.</h2>
+          <p>Most members will agree to autopay if you simply ask. The trick is to frame it as easier for <em>them</em>, not easier for you.</p>
+
+          <div class="script-box">
+            <div class="script-box-label">WHAT TO SAY (EMAIL OR IN-PERSON)</div>
+            <p class="script-quote">"We're moving everyone over to autopay so you don't have to think about your monthly invoice. It charges your card on the same day each month — and if you ever want to cancel, it's one click. Can I set yours up now?"</p>
+            <div class="script-breakdown">
+              <strong>Why it works:</strong> "Moving everyone over" frames it as standard — not a request. "So you don't have to think about it" puts the benefit on them. "One click to cancel" removes the lock-in fear that makes people resist autopay. Send it as a one-line email to your manual-pay list. Conversion rates of 60–80% are normal.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ----- ASSIGNMENT -----
+    const primaryLever = recommendL1_collection ? 'early-pay' :
+                         recommendL1_billing ? 'autopay-conversion' :
+                         recommendL2 ? 'delay-cost' :
+                         recommendL3 ? 'margin-test' :
+                         recommendL4 ? 'churn-fix' :
+                         'maintain-discipline';
+
+    const moveOne = {
+      'early-pay': `Pick the one client most likely to say yes to early-pay. Use the script above. Report back to yourself: did they take it?`,
+      'autopay-conversion': `Send the autopay email above to your manual-pay list. Report back: what % converted in the first 7 days?`,
+      'delay-cost': `One conversation — with a supplier, manufacturer, or contractor — about restructuring payment toward delivery, not toward order. The first conversation is the hardest.`,
+      'margin-test': isRecurring ? `Run one pricing experiment: introduce a premium tier 30-50% above current pricing, or test a price increase on new members only. Measure conversion.` : `Run one pricing test: a 5-10% price lift on new clients only, or one transaction routed through a higher-margin channel. Measure response.`,
+      'churn-fix': `Identify the 3 most common reasons members cancel (ask 5 recently-cancelled members). Pick the one you can address fastest. Implement the fix in 2 weeks.`,
+      'maintain-discipline': `Set a recurring monthly review: re-run this worksheet on the first of every month with updated numbers. Self-funding is a discipline you maintain, not a calculation you do once.`
+    };
+
+    const breakEvenStr = isRecurring && !isOneTime
+      ? `${fmt(breakEvenMembers)} active members`
+      : isOneTime && !isRecurring
+      ? `${fmt(breakEvenSales)} sales/month`
+      : `${(coverageRatio * 100).toFixed(0)}% coverage of fixed cost`;
+
+    html += `
+      <div class="section">
+        <div class="section-eyebrow">YOUR NEXT MOVES</div>
+        <h2 class="section-title">Three things to do this week.</h2>
+
+        <div class="assignment">
+          <ol>
+            <li><strong>Verify your break-even number.</strong> Your figure of <em>${breakEvenStr}</em> is only as accurate as the inputs you provided. Pressure-test your margin assumption and your fixed-cost number — if either is wrong by 20%+, your floor moves significantly.</li>
+            <li><strong>Make one move on your top-priority lever.</strong> ${moveOne[primaryLever]}</li>
+            <li><strong>Set a calendar reminder for 30 days from today.</strong> Re-run this worksheet in a month with updated numbers. The founders who bootstrap successfully do this monthly, not once.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="actions no-print">
+        <button class="btn btn-secondary" onclick="restart()">Start Over</button>
+        <button class="btn btn-primary" onclick="window.print()">Save / Print as PDF</button>
+      </div>
+
+      <div class="signature">
+        <div class="left">FOUNDERSPATH</div>
+        <div>Self-Funding Worksheet  ·  Generated ${today}</div>
+      </div>
+    `;
+
+    return html;
+  }
+
+  function restart() {
+    document.getElementById('strategy').innerHTML = '';
+    document.getElementById('strategy').classList.remove('active');
+    document.getElementById('progress-wrap').style.display = '';
+    document.querySelectorAll('input[type="text"], input[type="number"]').forEach(i => i.value = '');
+    document.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+    document.querySelectorAll('select').forEach(s => { s.selectedIndex = 0; });
+    businessModel = null;
+    applyModelVisibility(null);
+    document.getElementById('diag-hint').hidden = true;
+    document.getElementById('model-hint').hidden = true;
+    goTo(1);
+  }
+
+  function escape(s) {
+    if (!s) return '';
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function fmt(n) {
+    if (!isFinite(n)) return '0';
+    return Math.round(n).toLocaleString('en-US');
+  }
+
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.getElementById('diag-hint').hidden = true;
+    });
+  });
+</script>
+
+</body>
+</html>
